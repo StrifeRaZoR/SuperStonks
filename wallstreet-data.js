@@ -25,7 +25,7 @@ export async function main(ns) {
     KillChildren(container)
     container.remove()
   }
-
+await ns.sleep(5000); 
   const dropPage = doc.getElementById(SVGChartContainerwallstreet)
 
   container = doc.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -35,8 +35,7 @@ export async function main(ns) {
     ['id', 'graph_container'],
   ]
   AddAttr(container, containerAttr)
-
-  //Uncomment the below line to have the container connect to the above constant.  By default it's set to the overview hooks.
+  
   dropPage.appendChild(container)
 
   const uiThickness = 0.1
@@ -158,8 +157,8 @@ export async function main(ns) {
         for (let i = 0; i < lineCount; i++) {
           var temp = String(conHeight - (moneyList[i] * (conHeight - hBuffer * 2) + hBuffer))
           if (isNaN(temp)) {
-            ns.tprint('Uh oh NAN:')
-            ns.tprint(moneyList)
+            ns.asleep(5000);
+            ns.print("Possible delay in data.  This could be caused by lots of scripts running on HOME.  Please wait...")
           }
 
           var attr = [
@@ -181,7 +180,7 @@ export async function main(ns) {
         HighlightText(botTextBG, botText, container)
       
       }
-    if (ns.isRunning("/stonks/wallstreet.js", "home", ticker) == false) {
+    if (ns.isRunning("wallstreet.js", "home", ticker) == false) {
     ns.exit();
   }
     } catch (err) {

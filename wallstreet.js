@@ -8,8 +8,9 @@ export async function main(ns) {
   var ticker = ns.args[0];
   ns.run("wallstreet-data.js", 1, ticker)
   try {
+    ns.tprint("Chart Loading.  Please click CLOSE CHART before loading a new chart.")
     await new AppFactory(ns).mount({
-      config: { id: 'svg-chart-app-wallstreet' }, showTips: false,
+      config: { id: 'svg-chart-app-wallstreet', showTips: false },
       rootComponent: ChartContainerwallstreet,
     })
   } catch (error) {
@@ -46,7 +47,7 @@ const ChartContainerwallstreet = {
     >
       <div v-once id="${SVGChartContainerwallstreet}" />
       <template #actions>
-        <bbv-button @click="shutdownAll">?? Close Chart</bbv-button>
+        <bbv-button @click="shutdownAll">Close Chart</bbv-button>
       </template>
     </bbv-win>
   `,
