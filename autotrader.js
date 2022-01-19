@@ -3,11 +3,11 @@
 /** @param {NS} ns **/
 export async function main(ns) {
     var maxSharePer = 1.00
-    var stockBuyPer = 0.60
-    var stockShortPer = 0.40
-    var stockVolPer = 0.1
-    var moneyKeep = 100000000
-    var minSharePer = 25
+    var stockBuyPer = 0.60  //If stock has a 60% chance to increase, we go Long.
+    var stockShortPer = 0.40  //If stock has a 40% chance to increase (60% to decrease), we go Short.
+    var stockVolPer = 0.1  // Anything under 1.00% percent volatility will be targeted.  Careful with this one.
+    var moneyKeep = 100000000 //The amount of money you want to keep at all times.  100m default.
+    var minSharePer = 25  //Minimum amount of shares to spend on an order.  Set higher if commissions are eating you.
 
     while (true) {
         ns.disableLog('disableLog');
