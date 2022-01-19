@@ -52,7 +52,7 @@ export async function main(ns) {
         var volPer = ns.stock.getVolatility(stock);
         var playerMoney = ns.getServerMoneyAvailable('home');
 
-        if (forecast >= stockShortPer && volPer <= stockVolPer) {
+        if (forecast <= stockShortPer && volPer <= stockVolPer) {
             if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock,minSharePer, "Short")) {
                 var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
                 ns.stock.short(stock, shares);
