@@ -3,6 +3,7 @@ import { SVGChartContainerwallstreet } from 'wallstreet.js'
 export async function main(ns) {
   const doc = eval('document')
   var ticker = ns.args[0];
+
   //Number of lines rendered.  For stocks, I have this set to 60 to avoid cramping the window.
   const resolution = 180
   //Delay between data gathered in seconds.  For stocks, once again, delayed a bit so that there isn't tons of 'flat zones' on the chart.
@@ -19,13 +20,14 @@ export async function main(ns) {
   const wBuffer = 1
   const hBuffer = 5
 
+
   var container = doc.getElementById('graph_container')
 
   if (container != null) {
     KillChildren(container)
     container.remove()
   }
-await ns.sleep(5000); 
+  await ns.sleep(5000); //Give the chart time to load.
   const dropPage = doc.getElementById(SVGChartContainerwallstreet)
 
   container = doc.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -95,15 +97,15 @@ await ns.sleep(5000);
     container.appendChild(lines[i])
   }
 
-  var topText = CreateText('test', wBuffer, hBuffer + hBuffer / 2, container, doc, textSize)
+  var topText = CreateText('LOADING FORECAST...', wBuffer, hBuffer + hBuffer / 2, container, doc, textSize)
   var topTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
   HighlightText(topTextBG, topText, container)
 
-  var midText = CreateText('test', wBuffer, conHeight / 2 + hBuffer / 2, container, doc, textSize)
+  var midText = CreateText('LOADING TICKER...', wBuffer, conHeight / 2 + hBuffer / 2, container, doc, textSize)
   var midTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
   HighlightText(midTextBG, midText, container)
 
-  var botText = CreateText('test', wBuffer, conHeight - hBuffer / 2, container, doc, textSize)
+  var botText = CreateText('LOADING VOLATILITY...', wBuffer, conHeight - hBuffer / 2, container, doc, textSize)
   var botTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
   HighlightText(botTextBG, botText, container)
 
@@ -170,13 +172,13 @@ await ns.sleep(5000);
           AddAttr(lines[i], attr)
         }
       
-        topText.innerHTML = 'Bull Trend Zone (Long)'
+        topText.innerHTML = 'Forecast: ' + Math.floor((ns.stock.getForecast(ns.sprintf(ticker))*100)) + '% BULLISH'
         HighlightText(topTextBG, topText, container)
 
         midText.innerHTML = ticker +': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a')
         HighlightText(midTextBG, midText, container)
 
-        botText.innerHTML = 'Bear Trend Zone (Short)'
+        botText.innerHTML = 'Volatility: ' + ns.nFormat(ns.stock.getVolatility(ns.sprintf(ticker)), '0.00%')
         HighlightText(botTextBG, botText, container)
       
       }
