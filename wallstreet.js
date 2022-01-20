@@ -1,11 +1,10 @@
 import AppFactory from '/bb-vue/AppFactory.js'
-
 // prettier-ignore
 import { getGlobal, html, Mitt, setGlobal } from '/bb-vue/lib.js'
 
 /** @param { import("~/ns").NS } ns */
 export async function main(ns) {
-  var ticker = ns.args[0];
+var ticker = ns.args[0];
   ns.run("wallstreet-data.js", 1, ticker)
   try {
     ns.tprint("Chart Loading.  Please click CLOSE CHART before loading a new chart.")
@@ -19,6 +18,7 @@ export async function main(ns) {
     ns.exit()
   }
   // Listen for specific event
+
   let wantsShutdown = false
   let bus = Mitt().createBus()
   bus.on('wantsShutdown', () => (wantsShutdown = true))
@@ -29,14 +29,13 @@ export async function main(ns) {
    await ns.asleep(500)
   }
 
-  // And once the while loop fizzles, things will exit
+//ns.stock.buy(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker), ns.stock.getMaxShares(ticker)))
 }
 
 export const SVGChartContainerwallstreet = 'svgChartContainerwallstreet'
-
 const ChartContainerwallstreet = {
   name: 'svg-chart-wallstreet',
-  inject: ['appShutdown'], 
+  inject: ['appShutdown', 'sendOrderLong'], 
   template: html`
     <bbv-win
       class="__CMP_NAME__"
