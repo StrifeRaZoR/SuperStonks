@@ -1,10 +1,12 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+Update 2:  ACTIVE TRADING WITH BUTTONS!  
+
+![unknown](https://user-images.githubusercontent.com/97868924/150415391-e986ed77-6e53-4791-98f5-1bab28c56b44.png)
+
+
 Update 1:  Added volatility and forecast to chart data.  More to come!
-
-![Untitled](https://user-images.githubusercontent.com/97868924/150290579-b921ddfc-d76f-4e65-adeb-854ee99ff331.png)
-
 
 A simple 2-script charting platform for BitBurner's stock market.
 
