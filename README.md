@@ -1,6 +1,8 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+Update 1:  Added volatility and forecast to chart data.  More to come!
+
 A simple 2-script charting platform for BitBurner's stock market.
 
 BB-VUE IS REQUIRED. GET IT HERE: https://github.com/smolgumball/bb-vue/tree/dev#readme
