@@ -5,12 +5,16 @@ import { getGlobal, html, Mitt, setGlobal } from '/bb-vue/lib.js'
 /** @param { import("~/ns").NS } ns */
 export async function main(ns) {
   var ticker = ns.args[0];
+  let safeMode = await ns.prompt("Would you like to enable Trade Protection?");
+  safeMode
+  ns.tail();
 
-  ns.run("wallstreet-data.js", 1, ticker)
+  await ns.run("wallstreet-data.js", 1, ticker)
   try {
     ns.disableLog('disableLog');
     ns.disableLog('asleep');
     ns.disableLog('sleep');
+    ns.disableLog('getServerMoneyAvailable');
     ns.tprint("Chart Loading.  Please click CLOSE CHART before loading a new chart.")
     await new AppFactory(ns).mount({
       config: { id: 'svg-chart-app-wallstreet', showTips: false },
@@ -23,6 +27,8 @@ export async function main(ns) {
   }
 
   // Listen for specific event
+  let autoTrader = false
+  let enableAutoTrader = false
   let wantsShutdown = false
   let buyMaxLongShares = false
   let closeLongPosition = false
@@ -36,12 +42,13 @@ export async function main(ns) {
   bus.on('closeAllPositions', () => (sellAllShares = true))
   bus.on('closeLong', () => (closeLongPosition = true))
   bus.on('closeShort', () => (closeShortPosition = true))
+  bus.on('autoTrade', () => (enableAutoTrader = true))
   setGlobal('tickerBus', bus)
 
   // Instead of closing, let's keep this running
   while (wantsShutdown == false) {
     //Let's go ahead and render the profit monitor into the stats overview hook.
-    const doc = eval('document'); // This is expensive! (25GB RAM) Perhaps there's a way around it? ;)
+    const doc = eval('document');
     const hook0 = doc.getElementById('overview-extra-hook-0');
     const hook1 = doc.getElementById('overview-extra-hook-1');
     var ticker = ns.args[0];
@@ -51,10 +58,10 @@ export async function main(ns) {
       const headers = []
       const values = [];
       // Current stock LONG position profits
-      headers.push("[LONG] Profit");
+      headers.push("[LONG] Profit: ");
       values.push(ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a'));
       // Current stock SHORT position profits
-      headers.push("[SHORT] Profit");
+      headers.push("[SHORT] Profit: ");
       values.push(ns.nFormat(ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3]), '0.00a'));
       // TODO: Add more neat stuff
 
@@ -72,6 +79,9 @@ export async function main(ns) {
 
     var ticker = ns.args[0];
     var position = ns.stock.getPosition(ns.sprintf(ticker));
+    //var shortProfit = ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3])
+    //var longProfit = ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1])
+    //var myMoney = ns.getServerMoneyAvailable("home");
 
     if (buyMaxLongShares == true) {
       var position = ns.stock.getPosition(ns.sprintf(ticker));
@@ -111,11 +121,46 @@ export async function main(ns) {
       closeShortPosition = false;
 
     }
+    if (safeMode == true && position[0] > '1' && ns.stock.getForecast(ticker) < 0.45) {
+      ns.toast("TRADE PROTECTION TRIGGERED - FORECAST DOES NOT MATCH POSITION.  CLOSING LONG.", "warning", 5000);
+      ns.stock.sell(ticker, position[0]);
+
+    }
+    if (safeMode == true && position[2] > '1' && ns.stock.getForecast(ticker) > 0.55) {
+      ns.toast("TRADE PROTECTION TRIGGERED - FORECAST DOES NOT MATCH POSITION.  CLOSING SHORT.", "warning", 5000);
+      ns.stock.sellShort(ticker, position[2]);
+
+    }
+    if (autoTrader == true && position[0] == '0' && ns.stock.getForecast(ticker) > 0.50) {
+      await ns.asleep(200);
+      buyMaxLongShares = true;
+
+    }
+
+    if (autoTrader == true && position[2] == '0' && ns.stock.getForecast(ticker) < 0.50) {
+      await ns.asleep(200);
+      buyMaxShortShares = true;
+
+    }
+
+    if (enableAutoTrader == true) {
+      let autoTradeConfirm = ns.prompt("Enable Auto-Trade?")
+      await autoTradeConfirm;
+      if (autoTradeConfirm = true) {
+        ns.toast("Enabling Auto-Trader", "info", 5000);
+        autoTrader = true;
+        safeMode = true;
+        enableAutoTrader = false;
+      } else {
+        ns.toast("Auto-Trader NOT Enabled", "info", 5000);
+        autoTrader = false;
+        enableAutoTrader = false;
+      }
+    }
 
     await ns.asleep(500)
 
   }
-
 }
 
 export const SVGChartContainerwallstreet = 'svgChartContainerwallstreet'
@@ -125,11 +170,12 @@ const ChartContainerwallstreet = {
   template: html`
     <bbv-win
       class="__CMP_NAME__"
-      title="Wall Street Wave Trend"
+      title="WSE Active Trader"
       no-pad
       start-height="70%"
       start-width="40%"
     >
+      <div><button @click="enableAutoTrade">Enable/Disable Auto-Trader (BETA)</button></div>
       <div v-once id="${SVGChartContainerwallstreet}" />
       <template #actions>
         <bbv-button @click="shutdownAll">Close Chart</bbv-button>
@@ -137,7 +183,7 @@ const ChartContainerwallstreet = {
         <div><bbv-button @click="buyMaxShort">BUY MAX [SHORT]</bbv-button></div>
         <div><bbv-button @click="sellMaxLong">SELL MAX [LONG]</bbv-button></div>
         <div><bbv-button @click="sellMaxShort">SELL MAX [SHORT]</bbv-button></div>
-        <div><bbv-button @click="closeAllPositions">CLOSE ALL [LONG/SHORT]</bbv-button></div>
+        <div><bbv-button @click="closeAllPositions">CLOSE ALL [ALL]</bbv-button></div>
       </template>
     </bbv-win>
   `,
@@ -165,6 +211,9 @@ const ChartContainerwallstreet = {
     },
     sellMaxShort() {
       getGlobal('tickerBus').emit('closeShort')
+    },
+    enableAutoTrade() {
+      getGlobal('tickerBus').emit('autoTrade')
     },
   },
 }
