@@ -1,6 +1,14 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+Update 4:  AUTO-TRADER!  There is now a button at the top of the chart to enable/disable Auto-Trader.
+What is Auto-Trader?  Auto-Trader will trade for you, basically.  If the function is enabled, it will
+automatically place long or short positions depending on forecast and manage them for you.  You can toggle
+it whenever you'd like.
+
+![Untitled](https://user-images.githubusercontent.com/97868924/150469333-b2eb7368-d295-492c-957e-17b8a889028a.png)
+
+
 UPDATE 3:  FULL ACTIVE TRADING!  Profit reporting now hooked into overview panel!  Trade confirmations are sent via
 toast, so you can trade while ANY window is active!  (still only 1 chart open at a time...will fix soon-ish). 
 This also means all WSE/TIX/4S is needed.  I'm considering releasing the previous version as a stand-alone.
