@@ -5,7 +5,7 @@ export async function main(ns) {
   var ticker = ns.args[0];
 
   //Number of lines rendered.  For stocks, I have this set to 60 to avoid cramping the window.
-  const resolution = 180
+  const resolution = 300
   //Delay between data gathered in seconds.  For stocks, once again, delayed a bit so that there isn't tons of 'flat zones' on the chart.
   const delay = 10
 
@@ -171,8 +171,8 @@ export async function main(ns) {
           ]
           AddAttr(lines[i], attr)
         }
-      
-        topText.innerHTML = 'Forecast: ' + Math.floor((ns.stock.getForecast(ns.sprintf(ticker))*100)) + '% BULLISH'
+
+        topText.innerHTML = 'Forecast: ' + Math.floor((ns.stock.getForecast(ns.sprintf(ticker))*100)) + '% BULLISH' 
         HighlightText(topTextBG, topText, container)
 
         midText.innerHTML = ticker +': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a')
