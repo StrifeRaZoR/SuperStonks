@@ -1,10 +1,15 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
-Update 2:  ACTIVE TRADING WITH BUTTONS!  
+UPDATE 3:  FULL ACTIVE TRADING!  Profit reporting now hooked into overview panel!  Trade confirmations are sent via
+toast, so you can trade while ANY window is active!  (still only 1 chart open at a time...will fix soon-ish).
 
-![unknown](https://user-images.githubusercontent.com/97868924/150415391-e986ed77-6e53-4791-98f5-1bab28c56b44.png)
+Coming Soon:  TRADE PROTECTION!  An optional mode that can be enabled to protect the player's positions from
+fast volatility/forecast changes.
 
+![Untitled](https://user-images.githubusercontent.com/97868924/150451927-75e37abf-45c0-4e6a-9f2f-c413e6878695.png)
+
+Update 2:  ACTIVE TRADING WITH BUTTONS! 
 
 Update 1:  Added volatility and forecast to chart data.  More to come!
 
