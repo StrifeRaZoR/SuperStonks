@@ -1,6 +1,12 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+BB-VUE IS REQUIRED. GET IT HERE: https://github.com/smolgumball/bb-vue/tree/dev#readme
+
+Instructions: Run wallstreet.js with an argument of the stock ticker you'd like to chart. The argument MUST be capitalized. Example: run wallstreet.js FNS
+
+Would highly suggest setting up an alias. Example: alias chart="run wallstreet.js", and then you could just type chart FNS and immediately get a chart.
+
 ![image](https://user-images.githubusercontent.com/97868924/150624177-f3fb354b-a710-4d11-9e79-13fb47a0ae18.png)
 
 
@@ -60,12 +66,6 @@ Update 2:  ACTIVE TRADING WITH BUTTONS!
 Update 1:  Added volatility and forecast to chart data.  More to come!
 
 A simple 2-script charting platform for BitBurner's stock market.
-
-BB-VUE IS REQUIRED. GET IT HERE: https://github.com/smolgumball/bb-vue/tree/dev#readme
-
-Instructions: Run wallstreet.js with an argument of the stock ticker you'd like to chart. The argument MUST be capitalized. Example: run wallstreet.js FNS
-
-Would highly suggest setting up an alias. Example: alias chart="run wallstreet.js", and then you could just type chart FNS and immediately get a chart.
 
 HOW TO MAKE THE MONIES WITH THE CHART:
 
