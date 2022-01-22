@@ -7,9 +7,9 @@ export async function main(ns) {
   var ticker = ns.args[0];
   let safeMode = await ns.prompt("Would you like to enable Trade Protection?");
   safeMode
-  ns.tail();
+  //ns.tail();
 
-  await ns.run("wallstreet-data.js", 1, ticker)
+  ns.run("wallstreet-data.js", 1, ticker)
   try {
     ns.disableLog('disableLog');
     ns.disableLog('asleep');
@@ -35,6 +35,10 @@ export async function main(ns) {
   let closeShortPosition = false
   let buyMaxShortShares = false
   let sellAllShares = false
+  let quickStrangle = false
+  let longHedge = false
+  let shortHedge = false
+  let splitPlay = false
   let bus = Mitt().createBus()
   bus.on('wantsShutdown', () => (wantsShutdown = true))
   bus.on('buyMaxLong', () => (buyMaxLongShares = true))
@@ -43,6 +47,10 @@ export async function main(ns) {
   bus.on('closeLong', () => (closeLongPosition = true))
   bus.on('closeShort', () => (closeShortPosition = true))
   bus.on('autoTrade', () => (enableAutoTrader = true))
+  bus.on('quickPlay', () => (quickStrangle = true))
+  bus.on('quickHedgeLong', () => (longHedge = true))
+  bus.on('quickHedgeShort', () => (shortHedge = true))
+  bus.on('quickSplitPlay', () => (splitPlay = true))
   setGlobal('tickerBus', bus)
 
   // Instead of closing, let's keep this running
@@ -82,6 +90,9 @@ export async function main(ns) {
     //var shortProfit = ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3])
     //var longProfit = ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1])
     //var myMoney = ns.getServerMoneyAvailable("home");
+
+
+    //
 
     if (buyMaxLongShares == true) {
       var position = ns.stock.getPosition(ns.sprintf(ticker));
@@ -132,6 +143,7 @@ export async function main(ns) {
 
     }
     if (autoTrader == true && position[0] == '0' && ns.stock.getForecast(ticker) > 0.50) {
+      ns.toast("AUTO-TRADE: LONG PURCHASED", "info", 2000);
       await ns.asleep(200);
       buyMaxLongShares = true;
 
@@ -142,20 +154,66 @@ export async function main(ns) {
       buyMaxShortShares = true;
 
     }
+    if (quickStrangle == true && position[0] == '0' && ns.stock.getForecast(ticker) > 0.50) {
+      ns.toast("Executing Quick Strangle on " + ticker + "...", "info", "5000");
+      buyMaxLongShares = true;
+      await ns.asleep(500);
+      ns.stock.placeOrder(ticker, position[0], (ns.stock.getAskPrice(ticker) * 1.05), "LimitSell", "Long");
+      ns.toast("Limit Sell Placed [LONG]...", "info", 2000);
+      ns.stock.placeOrder(ticker, position[0], (ns.stock.getBidPrice(ticker) * 0.90), "StopSell", "Long");
+      ns.toast("Stop Limit Placed [LONG]...", "info", 2000);
+      quickStrangle = false;
+
+    }
+    if (quickStrangle == true && position[2] == '0' && ns.stock.getForecast(ticker) < 0.50) {
+      ns.toast("Executing Quick Strangle on " + ticker + "...", "info", "5000");
+      buyMaxShortShares = true;
+      await ns.asleep(500);
+      ns.stock.placeOrder(ticker, position[2], (ns.stock.getAskPrice(ticker) * 0.95), "LimitSell", "Short");
+      ns.toast("Limit Sell Placed [SHORT]...", "info", 2000);
+      ns.stock.placeOrder(ticker, position[2], (ns.stock.getBidPrice(ticker) * 1.10), "StopSell", "Short");
+      ns.toast("Stop Limit Placed [SHORT]...", "info", 2000);
+      quickStrangle = false;
+      
+    }
+    if (longHedge == true && position[0] == '0'){
+      ns.toast("Executing Hedged Long Play on " + ticker + "...", "info", 5000);
+      ns.stock.buy(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.75, ns.stock.getMaxShares(ticker) * 0.75));
+      ns.stock.short(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.25, ns.stock.getMaxShares(ticker) * 0.25));
+      longHedge = false;
+
+    }
+    if (shortHedge == true && position[2] == '0'){
+      ns.toast("Executing Hedged Short Play on " + ticker + "...", "info", 5000);
+      ns.stock.buy(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.25, ns.stock.getMaxShares(ticker) * 0.25));
+      ns.stock.short(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.75, ns.stock.getMaxShares(ticker) * 0.75));
+      shortHedge = false;
+      
+    }
+    if (splitPlay == true && position[0] == '0' && position[2] == '0'){
+      ns.toast("Executing Split Play on " + ticker + "...", "info", 5000);
+      ns.stock.buy(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.49, ns.stock.getMaxShares(ticker) * 0.50));
+      ns.stock.short(ticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(ticker) * 0.49, ns.stock.getMaxShares(ticker) * 0.50));
+      splitPlay = false;
+      
+    }
 
     if (enableAutoTrader == true) {
-      let autoTradeConfirm = ns.prompt("Enable Auto-Trade?")
-      await autoTradeConfirm;
-      if (autoTradeConfirm = true) {
+      let autoTradeConfirm = await ns.prompt("Enable Auto-Trade?")
+
+      if (autoTradeConfirm == true) {
         ns.toast("Enabling Auto-Trader", "info", 5000);
         autoTrader = true;
         safeMode = true;
         enableAutoTrader = false;
-      } else {
+      } 
+      if (autoTradeConfirm == false) {
         ns.toast("Auto-Trader NOT Enabled", "info", 5000);
         autoTrader = false;
+        safeMode = false;
         enableAutoTrader = false;
       }
+
     }
 
     await ns.asleep(500)
@@ -172,11 +230,17 @@ const ChartContainerwallstreet = {
       class="__CMP_NAME__"
       title="WSE Active Trader"
       no-pad
-      start-height="70%"
-      start-width="40%"
+      start-height="728px"
+      start-width="725px"
     >
       <div><button @click="enableAutoTrade">Enable/Disable Auto-Trader (BETA)</button></div>
       <div v-once id="${SVGChartContainerwallstreet}" />
+      <div>
+      <button @click="quickStrangle">QUICK STRANGLE</button>
+      <button @click="quickSplit">QUICK SPLIT</button>
+      <button @click="longHedge">GO LONG - HEDGED</button>
+      <button @click="shortHedge">GO SHORT - HEDGED</button>
+      </div>
       <template #actions>
         <bbv-button @click="shutdownAll">Close Chart</bbv-button>
         <div><bbv-button @click="buyMaxLong">BUY MAX [LONG]</bbv-button></div>
@@ -214,6 +278,18 @@ const ChartContainerwallstreet = {
     },
     enableAutoTrade() {
       getGlobal('tickerBus').emit('autoTrade')
+    },
+    quickStrangle() {
+      getGlobal('tickerBus').emit('quickPlay')
+    },
+    quickSplit() {
+      getGlobal('tickerBus').emit('quickSplitPlay')
+    },
+    longHedge() {
+      getGlobal('tickerBus').emit('quickHedgeLong')
+    },
+    shortHedge() {
+      getGlobal('tickerBus').emit('quickHedgeShort')
     },
   },
 }
