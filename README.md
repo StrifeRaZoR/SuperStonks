@@ -1,6 +1,27 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+Update 5:  ADVANCED POSITIONS!  I've added some additional position trades below the chart.  A quick overview
+of what each one does:
+
+![Untitled](https://user-images.githubusercontent.com/97868924/150623697-f922c0b8-2830-4977-9782-048dbafbecb2.png)
+
+Strangle:  Places a Long/Short (Based on forecast/volatility) order for max shares and then places a limit sell 
+10% above current price and a limit stop 15% below current price (reversed for short positions).  What does this do?
+It strangles the price at your current purchase.  If it moves above or below the strangle, the position closes.
+
+Split:  A simple, yet effective, way to limit losses (and gains) at the expense of exposure.  This places a Long AND
+Short order for 50% of available funds/max shares.  You are now split on the stock and covered regardless of direction.
+Why would I do this?  Volatility is high and forecast is between 40% and 60%.  Split your order and allow the price to 
+move.  If/when the forecast changes, close the long/short (whichever is at a loss) and double down on the other.
+
+Go Long/Short Hedged:  A safer alternative to buying maximum amounts of shares.  What does this do?  Places an Long/Short
+order for 75% of max amount and an opposite order for 25% of max amount.  Why would I do that?  It limits your losses in
+uncertain markets.  This is a wonderful position to open if volatility is high, or if a stock continues to move against
+you even if the forecast is favorable.  Example:  Forecast of 60% Bullish and volatlity of 0.80%.  Go long hedged.  The 
+price drops, but forecast stays bullish.  Allow the drop to happen and sell your (small 25%) position for a gain and then 
+let the price rebound.
+
 Update 4:  AUTO-TRADER!  There is now a button at the top of the chart to enable/disable Auto-Trader.
 What is Auto-Trader?  Auto-Trader will trade for you, basically.  If the function is enabled, it will
 automatically place long or short positions depending on forecast and manage them for you.  You can toggle
