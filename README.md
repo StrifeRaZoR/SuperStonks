@@ -1,10 +1,18 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
-Update 5:  ADVANCED POSITIONS!  I've added some additional position trades below the chart.  A quick overview
+Update 5:  ADVANCED POSITIONS!  TRADE PROTECTION!  I've added some additional position trades below the chart.  A quick overview
 of what each one does:
 
 ![Untitled](https://user-images.githubusercontent.com/97868924/150623697-f922c0b8-2830-4977-9782-048dbafbecb2.png)
+
+TRADE PROTECTION:  Users will now be prompted at startup if they would like to enable Trade Protection.  What is it?
+This enables the script's 'Safe Mode'.  With Safe Mode enabled, any position that you have that suddenly changes forecast
+or has a volatility spike, it will manage for you in the background.  THIS PREVENTS LOSING ALL YOUR MONEY ON A SINKING STOCK.
+If you DO ENABLE this feature, DO NOT FIGHT IT.  If forecast is not bullish and you place a long order, it WILL evaluate
+it and more than likely close it. (SAFE MODE IS ENABLED BY DEFAULT WHEN AUTO-TRADE IS ENABLED.  SAFE MODE IS DISABLED
+IF AUTO-TRADE IS DISABLED.  This means you do not have to re-launch the chart to enable/disable safe mode.  Just disable 
+Auto-Trade)
 
 Strangle:  Places a Long/Short (Based on forecast/volatility) order for max shares and then places a limit sell 
 10% above current price and a limit stop 15% below current price (reversed for short positions).  What does this do?
@@ -22,6 +30,8 @@ you even if the forecast is favorable.  Example:  Forecast of 60% Bullish and vo
 price drops, but forecast stays bullish.  Allow the drop to happen and sell your (small 25%) position for a gain and then 
 let the price rebound.
 
+-------------------------------------------------------------------------------------------------------------------------
+
 Update 4:  AUTO-TRADER!  There is now a button at the top of the chart to enable/disable Auto-Trader.
 What is Auto-Trader?  Auto-Trader will trade for you, basically.  If the function is enabled, it will
 automatically place long or short positions depending on forecast and manage them for you.  You can toggle
@@ -29,6 +39,7 @@ it whenever you'd like.
 
 ![Untitled](https://user-images.githubusercontent.com/97868924/150469333-b2eb7368-d295-492c-957e-17b8a889028a.png)
 
+-------------------------------------------------------------------------------------------------------------------------
 
 UPDATE 3:  FULL ACTIVE TRADING!  Profit reporting now hooked into overview panel!  Trade confirmations are sent via
 toast, so you can trade while ANY window is active!  (still only 1 chart open at a time...will fix soon-ish). 
@@ -37,9 +48,13 @@ This also means all WSE/TIX/4S is needed.  I'm considering releasing the previou
 Coming Soon:  TRADE PROTECTION!  An optional mode that can be enabled to protect the player's positions from
 fast volatility/forecast changes.
 
+-------------------------------------------------------------------------------------------------------------------------
+
 ![Untitled](https://user-images.githubusercontent.com/97868924/150451927-75e37abf-45c0-4e6a-9f2f-c413e6878695.png)
 
 Update 2:  ACTIVE TRADING WITH BUTTONS! 
+
+-------------------------------------------------------------------------------------------------------------------------
 
 Update 1:  Added volatility and forecast to chart data.  More to come!
 
