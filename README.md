@@ -5,7 +5,8 @@ BB-VUE IS REQUIRED. GET IT HERE: https://github.com/smolgumball/bb-vue/tree/dev#
 
 Instructions: Run wallstreet.js with an argument of the stock ticker you'd like to chart. The argument MUST be capitalized. Example: run wallstreet.js FNS
 
-Files Needed:  Just wallstreet.js and wallstreet-data.js.  autotrader.js is NOT a part of this package.  It is a stand-alone auto-trader that uses
+Files Needed:  Just wallstreet.js and wallstreet-data.js.  
+autotrader.js is NOT a part of this package.  It is a stand-alone auto-trader that uses
 BN8 functions.  
 
 Would highly suggest setting up an alias. Example: alias chart="run wallstreet.js", and then you could just type chart FNS and immediately get a chart.
