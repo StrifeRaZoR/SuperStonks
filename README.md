@@ -1,6 +1,9 @@
 # SuperStonks
 Stock Charts For BitBurner!
 
+![image](https://user-images.githubusercontent.com/97868924/150624177-f3fb354b-a710-4d11-9e79-13fb47a0ae18.png)
+
+
 Update 5:  ADVANCED POSITIONS!  TRADE PROTECTION!  I've added some additional position trades below the chart.  A quick overview
 of what each one does:
 
@@ -49,8 +52,6 @@ Coming Soon:  TRADE PROTECTION!  An optional mode that can be enabled to protect
 fast volatility/forecast changes.
 
 -------------------------------------------------------------------------------------------------------------------------
-
-![Untitled](https://user-images.githubusercontent.com/97868924/150451927-75e37abf-45c0-4e6a-9f2f-c413e6878695.png)
 
 Update 2:  ACTIVE TRADING WITH BUTTONS! 
 
