@@ -231,7 +231,7 @@ function HighlightText(bg, text, parent) {
     ['width', String(textBox.width)],
     ['height', String(textBox.height)],
     ['fill', 'black'],
-    ['opacity', '0.1'],
+    ['opacity', '0.0'],
   ])
   parent.insertBefore(bg, text)
   
