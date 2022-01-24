@@ -3,29 +3,34 @@ Stock Charts For BitBurner!
 
 BB-VUE IS REQUIRED. GET IT HERE: https://github.com/smolgumball/bb-vue/tree/dev#readme
 
-Instructions: Run wallstreet.js with an argument of the stock ticker you'd like to chart. The argument MUST be capitalized. Example: run wallstreet.js FNS
+Instructions: Run wallstreet.js and that's it!  Select a ticker from the drop-down and away you go!
 
 Files Needed:  Just wallstreet.js and wallstreet-data.js.  
 autotrader.js is NOT a part of this package.  It is a stand-alone auto-trader that uses
 BN8 functions.  
 
-Would highly suggest setting up an alias. Example: alias chart="run wallstreet.js", and then you could just type chart FNS and immediately get a chart.
+![Untitled](https://user-images.githubusercontent.com/97868924/150722272-fb7501fa-9a6d-47f5-aea1-fb6a2a3c62e7.png)
 
-![image](https://user-images.githubusercontent.com/97868924/150624177-f3fb354b-a710-4d11-9e79-13fb47a0ae18.png)
+BIG UPDATE!!  
+
+Tons of data added to the chart!  More buttons!  Collapsable menus!  NO LONGER HAVE TO CLOSE THE CHART TO OPEN A NEW
+ONE!  Load charts at the click of a button!  New features detailed below!
+
+1.  The new ticker box!  Drop down the menu and click a ticker to load the chart!  Super easy!
+2.  Position profit has been moved to inside the chart.  It now calculates the average 5min high price.
+3.  A new AVG PRICE has been added.  This price is the AVERAGE price in the last 5mins.  Use this to help your entries.
+4.  Short position profit and the average 5min low price.
+5.  Advanced Positions has been moved to its own dropdown.  Auto-Trader has been moved into the Extra Tools menu.  Safe
+Mode is now automatically activated and deactivated with Auto-Trader.
+
+NEW FEATURE!  STOCK CRAWLER!  You can use the Stock Crawler to launch a single probe into the entire market to help find
+stocks to go long/short on.  The output will be in the terminal.  Feel free to use it as many times as you'd like, as that
+is the main purpose!
+
+COMING SOON!  SCALPER BOT!
 
 
-Update 5:  ADVANCED POSITIONS!  TRADE PROTECTION!  I've added some additional position trades below the chart.  A quick overview
-of what each one does:
-
-![Untitled](https://user-images.githubusercontent.com/97868924/150623697-f922c0b8-2830-4977-9782-048dbafbecb2.png)
-
-TRADE PROTECTION:  Users will now be prompted at startup if they would like to enable Trade Protection.  What is it?
-This enables the script's 'Safe Mode'.  With Safe Mode enabled, any position that you have that suddenly changes forecast
-or has a volatility spike, it will manage for you in the background.  THIS PREVENTS LOSING ALL YOUR MONEY ON A SINKING STOCK.
-If you DO ENABLE this feature, DO NOT FIGHT IT.  If forecast is not bullish and you place a long order, it WILL evaluate
-it and more than likely close it. (SAFE MODE IS ENABLED BY DEFAULT WHEN AUTO-TRADE IS ENABLED.  SAFE MODE IS DISABLED
-IF AUTO-TRADE IS DISABLED.  This means you do not have to re-launch the chart to enable/disable safe mode.  Just disable 
-Auto-Trade)
+ADVANCED POSITION EXPLANATIONS:
 
 Strangle:  Places a Long/Short (Based on forecast/volatility) order for max shares and then places a limit sell 
 10% above current price and a limit stop 15% below current price (reversed for short positions).  What does this do?
@@ -50,26 +55,6 @@ What is Auto-Trader?  Auto-Trader will trade for you, basically.  If the functio
 automatically place long or short positions depending on forecast and manage them for you.  You can toggle
 it whenever you'd like.
 
-![Untitled](https://user-images.githubusercontent.com/97868924/150469333-b2eb7368-d295-492c-957e-17b8a889028a.png)
-
--------------------------------------------------------------------------------------------------------------------------
-
-UPDATE 3:  FULL ACTIVE TRADING!  Profit reporting now hooked into overview panel!  Trade confirmations are sent via
-toast, so you can trade while ANY window is active!  (still only 1 chart open at a time...will fix soon-ish). 
-This also means all WSE/TIX/4S is needed.  I'm considering releasing the previous version as a stand-alone.
-
-Coming Soon:  TRADE PROTECTION!  An optional mode that can be enabled to protect the player's positions from
-fast volatility/forecast changes.
-
--------------------------------------------------------------------------------------------------------------------------
-
-Update 2:  ACTIVE TRADING WITH BUTTONS! 
-
--------------------------------------------------------------------------------------------------------------------------
-
-Update 1:  Added volatility and forecast to chart data.  More to come!
-
-A simple 2-script charting platform for BitBurner's stock market.
 
 HOW TO MAKE THE MONIES WITH THE CHART:
 
