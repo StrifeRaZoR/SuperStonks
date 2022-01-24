@@ -9,16 +9,19 @@ export async function main(ns) {
   //Delay between data gathered in seconds.  For stocks, once again, delayed a bit so that there isn't tons of 'flat zones' on the chart.
   const delay = 10
 
-  const textSize = 5.0
+  const textSize = 2.5
 
   const lineColor = 'green'
 
   const strokeWidth = 0.5
 
-  const conWidth = 100
-  const conHeight = 80
+  const conWidth = 80
+  const conHeight = 60
   const wBuffer = 1
   const hBuffer = 5
+  await ns.clearPort(1)
+  await ns.clearPort(2)
+  await ns.writePort(3, ticker)
 
 
   var container = doc.getElementById('graph_container')
@@ -27,7 +30,7 @@ export async function main(ns) {
     KillChildren(container)
     container.remove()
   }
-  await ns.sleep(5000); //Give the chart time to load.
+ //Give the chart time to load.
   const dropPage = doc.getElementById(SVGChartContainerwallstreet)
 
   container = doc.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -75,6 +78,7 @@ export async function main(ns) {
   ])
   container.appendChild(botLine)
 
+
   var lines = []
   for (let i = 0; i < resolution - 1; i++) {
     lines[i] = doc.createElementNS('http://www.w3.org/2000/svg', 'line')
@@ -110,15 +114,19 @@ export async function main(ns) {
   HighlightText(botTextBG, botText, container)
 
 
-  //First argument is the ticker that it targets.  Would need to pass this off to the window wrapper?  I guess?
   var values = []
   while (true) {
     var ticker = ns.args[0];
+    var position = ns.stock.getPosition(ticker)
     try {
       if (values.length == resolution) {
         values.splice(0, 1)
+        await ns.clearPort(1);
+        await ns.clearPort(2);
+        
       }
       values[values.length] = ns.stock.getPrice(ns.sprintf(ticker))
+
 
       if (values.length > 2) {
         var lineCount = values.length - 2
@@ -129,7 +137,12 @@ export async function main(ns) {
         for (let i = 0; i < values.length; i++) {
           moneyList[i] = values[i]
         }
-
+      await ns.clearPort(1)
+      await ns.clearPort(2)
+      await ns.writePort(1, (Math.max(...moneyList)))
+      await ns.writePort(2, (Math.min(...moneyList)))
+      await ns.writePort(3, ticker)
+        var fiveminavg = ns.nFormat((ns.peek(2) + ns.peek(1)) / 2, '$0.00a')
         var highestVal = moneyList[0]
         var lowestVal = moneyList[0]
 
@@ -170,26 +183,38 @@ export async function main(ns) {
             ['y2', String(conHeight - (moneyList[i + 1] * (conHeight - hBuffer * 2) + hBuffer))],
           ]
           AddAttr(lines[i], attr)
-        }
 
-        topText.innerHTML = 'Forecast: ' + Math.floor((ns.stock.getForecast(ns.sprintf(ticker))*100)) + '% BULLISH' 
+        }
+        
+        topText.innerHTML = 'FORECAST: ' + Math.floor((ns.stock.getForecast(ns.sprintf(ticker))*100)) + '%' + ' || 5MIN HIGH: ' + ns.nFormat(ns.peek(1), '$0.00a') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
         HighlightText(topTextBG, topText, container)
 
-        midText.innerHTML = ticker +': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a')
+        midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+fiveminavg+' AVG)'
         HighlightText(midTextBG, midText, container)
 
-        botText.innerHTML = 'Volatility: ' + ns.nFormat(ns.stock.getVolatility(ns.sprintf(ticker)), '0.00%')
+        botText.innerHTML = 'VOL: ' + ns.nFormat(ns.stock.getVolatility(ns.sprintf(ticker)), '0.00%') + ' || 5MIN LOW: ' + ns.nFormat(ns.peek(2), '$0.00a') + ' || [SHORT] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3]), '0.00a');
         HighlightText(botTextBG, botText, container)
-      
+
+
+        
       }
-    if (ns.isRunning("wallstreet.js", "home", ticker) == false) {
-    ns.exit();
-  }
+
+
     } catch (err) {
       // This might come in handy later
       ns.print('ERROR: Update Skipped: ' + String(err))
     }
     await ns.sleep(delay * 100)
+    await ns.clearPort(1);
+    await ns.clearPort(2);
+
+    if (ns.isRunning("wallstreet.js", "home") == false) {
+      await ns.clearPort(1);
+      await ns.clearPort(2);
+      await ns.clearPort(3);
+      ns.exit();
+    }
+
   }
 }
 
