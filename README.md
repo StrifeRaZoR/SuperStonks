@@ -9,6 +9,8 @@ Files Needed:  Just wallstreet.js and wallstreet-data.js.
 autotrader.js is NOT a part of this package.  It is a stand-alone auto-trader that uses
 BN8 functions.  
 
+There are 2 version:  Regular and Lite.  Lite version does NOT NEED 4S DATA.  JUST A WSE ACCOUNT.
+
 ![Untitled](https://user-images.githubusercontent.com/97868924/150722272-fb7501fa-9a6d-47f5-aea1-fb6a2a3c62e7.png)
 
 BIG UPDATE!!  
