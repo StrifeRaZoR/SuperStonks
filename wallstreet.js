@@ -5,7 +5,6 @@ import { getGlobal, html, Mitt, setGlobal, css } from '/bb-vue/lib.js'
 /** @param { import("~/ns").NS } ns */
 export async function main(ns) {
 
-
   try {
     ns.disableLog('disableLog');
     ns.disableLog('asleep');
@@ -22,6 +21,29 @@ export async function main(ns) {
     ns.exit()
   }
 
+ /* 
+  *	Configure coordination channels
+  *	Edit port handles here and in the corresponding data script to fit your current port layout
+  * Defaults: channel1 -> PortHandle(1), etc.
+  * ~ Storm6436
+  */
+  
+  const channel1=ns.getPortHandle(1)
+  const channel2=ns.getPortHandle(2)
+  const channel3=ns.getPortHandle(3)
+  
+  /*
+  * Configure script installation location -- Absolute path only. 
+  * e.g. "/', '/wallstreet/', etc.
+  * Note: non-root directories require a trailing slash
+  * ~Storm6436
+  */
+  const scriptDir = "/stocks/"
+  
+  if(!ns.fileExists(scriptDir+"wallstreet-data.js")){
+	ns.tprint("Script path invalid: ", scriptDir+"wallstreet-data.js", " not found.")
+	ns.exit()
+  }
 
   // Listen for specific event
   let autoTrader = false
@@ -131,366 +153,366 @@ export async function main(ns) {
 
     //init chart loading triggers
     if (loadECP == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [ECP] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "ECP")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "ECP")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadECP = false;
     }
     if (loadMGCP == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [MGCP] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "MGCP")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "MGCP")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadMGCP = false;
     }
     if (loadBLD == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [BLD] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "BLD")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "BLD")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadBLD = false;
     }
     if (loadCLRK == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [CLRK] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "CLRK")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "CLRK")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadCLRK = false;
     }
     if (loadOMTK == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [OMTK] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "OMTK")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "OMTK")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadOMTK = false;
     }
     if (loadFSIG == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [FSIG] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "FSIG")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "FSIG")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadFSIG = false;
     }
     if (loadKGI == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [KGI] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "KGI")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "KGI")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadKGI = false;
     }
     if (loadFLCM == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [FLCM] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "FLCM")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "FLCM")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadFLCM = false;
     }
     if (loadSTM == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [STM] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "STM")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "STM")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadSTM = false;
     }
     if (loadDCOMM == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [DCOMM] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "DCOMM")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "DCOMM")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadDCOMM = false;
     }
     if (loadHLS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [HLS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "HLS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "HLS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadHLS = false;
     }
     if (loadVITA == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [VITA] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "VITA")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "VITA")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadVITA = false;
     }
     if (loadICRS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [ICRS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "ICRS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "ICRS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadICRS = false;
     }
     if (loadUNV == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [UNV] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "UNV")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "UNV")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadUVN = false;
     }
     if (loadAERO == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [AERO] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "AERO")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "AERO")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadAERO = false;
     }
     if (loadOMN == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [OMN] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "OMN")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "OMN")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadOMN = false;
     }
     if (loadSLRS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [SLRS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "SLRS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "SLRS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadSLRS = false;
     }
     if (loadGPH == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [GPH] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "GPH")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "GPH")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadGPH = false;
     }
     if (loadNVMD == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [NVMD] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "NVMD")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "NVMD")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadNVMD = false;
     }
     if (loadWDS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [WDS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "WDS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "WDS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadWDS = false;
     }
     if (loadLXO == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [LXO] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "LXO")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "LXO")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadLXO = false;
     }
     if (loadRHOC == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [RHOC] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "RHOC")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "RHOC")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadRHOC = false;
     }
     if (loadAPHE == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [APHE] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "APHE")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "APHE")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadAPHE = false;
     }
     if (loadSYSC == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [SYSC] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "SYSC")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "SYSC")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadSYSC = false;
     }
     if (loadCTK == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [CTK] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "CTK")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "CTK")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadCTK = false;
     }
     if (loadNTLK == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [NTLK] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "NTLK")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "NTLK")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadNTLK = false;
     }
     if (loadOMGA == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [OMGA] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "OMGA")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "OMGA")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadOMGA = false;
     }
     if (loadFNS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [FNS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "FNS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "FNS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadFNS = false;
     }
     if (loadJGN == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [JGN] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "JGN")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "JGN")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadJGN = false;
     }
     if (loadSGC == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [SGC] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "SGC")
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "SGC")
 
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadSGC = false;
     }
     if (loadCTYS == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [CTYS] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "CTYS")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "CTYS")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadCTYS = false;
     }
     if (loadMDYN == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [MDYN] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "MDYN")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "MDYN")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadMDYN = false;
     }
     if (loadTITN == true) {
-      await ns.scriptKill("wallstreet-data.js", "home");
+      await ns.scriptKill(scriptDir+"wallstreet-data.js", "home");
       ns.toast("Loading [TITN] Chart...", "info", 2000);
       await ns.asleep(500);
-      await ns.run("wallstreet-data.js", 1, "TITN")
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+      await ns.run(scriptDir+"wallstreet-data.js", 1, "TITN")
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       autoTrader = false;
       loadTITN = false;
     }
@@ -522,8 +544,8 @@ export async function main(ns) {
       ns.exit();
     }
 
-    if(ns.peek(3) != "NULL PORT DATA") {
-    let loadedticker = ns.peek(3);
+    if(channel3.peek() != "NULL PORT DATA") {
+    let loadedticker = channel3.peek();
     let position = ns.stock.getPosition(loadedticker);
 
     if (buyMaxLongShares == true) {
