@@ -1,3 +1,4 @@
+// Edit import line to include absolute path. e.g. '/stocks/wallstreet-lite.js'
 import { SVGChartContainerwallstreet } from 'wallstreet-lite.js'
 
 export async function main(ns) {
@@ -19,9 +20,29 @@ export async function main(ns) {
   const conHeight = 60
   const wBuffer = 1
   const hBuffer = 5
-  await ns.clearPort(1)
-  await ns.clearPort(2)
-  await ns.writePort(3, ticker)
+  
+   /* 
+  *	Configure coordination channels
+  *	Edit port handles to fit your current port layout
+  * Defaults: channel1 -> PortHandle(1), etc.
+  * ~ Storm6436
+  */
+  
+  const channel1=ns.getPortHandle(1)
+  const channel2=ns.getPortHandle(2)
+  const channel3=ns.getPortHandle(3)
+  
+  /*
+  * Configure script installation location -- Absolute path only. 
+  * e.g. "/', '/wallstreet/', etc.
+  * Note: non-root directories require a trailing slash
+  * ~Storm6436
+  */
+  const scriptDir = "/stocks/"
+  
+  await channel1.clear()
+  await channel2.clear()
+  await channel3.write(ticker)
 
 
   var container = doc.getElementById('graph_container')
@@ -121,8 +142,8 @@ export async function main(ns) {
     try {
       if (values.length == resolution) {
         values.splice(0, 1)
-        await ns.clearPort(1);
-        await ns.clearPort(2);
+        await channel1.clear();
+        await channel2.clear();
         
       }
       values[values.length] = ns.stock.getPrice(ns.sprintf(ticker))
@@ -137,12 +158,12 @@ export async function main(ns) {
         for (let i = 0; i < values.length; i++) {
           moneyList[i] = values[i]
         }
-      await ns.clearPort(1)
-      await ns.clearPort(2)
+      await channel1.clear()
+      await channel2.clear()
       await ns.writePort(1, (Math.max(...moneyList)))
-      await ns.writePort(2, (Math.min(...moneyList)))
-      await ns.writePort(3, ticker)
-        var fiveminavg = ns.nFormat((ns.peek(2) + ns.peek(1)) / 2, '$0.00a')
+      await channel2.write((Math.min(...moneyList)))
+      await channel3.write(ticker)
+        var fiveminavg = ns.nFormat((channel2.peek() + channel1.peek()) / 2, '$0.00a')
         var highestVal = moneyList[0]
         var lowestVal = moneyList[0]
 
@@ -186,13 +207,13 @@ export async function main(ns) {
 
         }
         
-        topText.innerHTML = '5MIN HIGH: ' + ns.nFormat(ns.peek(1), '$0.00a') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
+        topText.innerHTML = '5MIN HIGH: ' + ns.nFormat(channel1.peek(), '$0.00a') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
         HighlightText(topTextBG, topText, container)
 
         midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+fiveminavg+' AVG)'
         HighlightText(midTextBG, midText, container)
 
-        botText.innerHTML = '5MIN LOW: ' + ns.nFormat(ns.peek(2), '$0.00a')
+        botText.innerHTML = '5MIN LOW: ' + ns.nFormat(channel2.peek(), '$0.00a')
         HighlightText(botTextBG, botText, container)
 
 
@@ -205,13 +226,13 @@ export async function main(ns) {
       ns.print('ERROR: Update Skipped: ' + String(err))
     }
     await ns.sleep(delay * 100)
-    await ns.clearPort(1);
-    await ns.clearPort(2);
+    await channel1.clear();
+    await channel2.clear();
 
-    if (ns.isRunning("wallstreet-lite.js", "home") == false) {
-      await ns.clearPort(1);
-      await ns.clearPort(2);
-      await ns.clearPort(3);
+    if (ns.isRunning(scriptDir+"wallstreet-lite.js", "home") == false) {
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
       ns.exit();
     }
 
