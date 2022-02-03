@@ -5,7 +5,7 @@ export async function main(ns) {
   var ticker = ns.args[0];
 
   //Number of lines rendered.  For stocks, I have this set to 60 to avoid cramping the window.
-  const resolution = 300
+  const resolution = 420
   //Delay between data gathered in seconds.  For stocks, once again, delayed a bit so that there isn't tons of 'flat zones' on the chart.
   const delay = 10
 
@@ -109,7 +109,7 @@ export async function main(ns) {
   var midTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
   HighlightText(midTextBG, midText, container)
 
-  var botText = CreateText('LOADING VOLATILITY...', wBuffer, conHeight - hBuffer / 2, container, doc, textSize)
+  var botText = CreateText('COLLECTING DATA...', wBuffer, conHeight - hBuffer / 2, container, doc, textSize)
   var botTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
   HighlightText(botTextBG, botText, container)
 
@@ -127,7 +127,6 @@ export async function main(ns) {
       }
       values[values.length] = ns.stock.getPrice(ns.sprintf(ticker))
 
-
       if (values.length > 2) {
         var lineCount = values.length - 2
         var xOff = (conWidth - wBuffer * 2) / lineCount
@@ -142,7 +141,14 @@ export async function main(ns) {
       await ns.writePort(1, (Math.max(...moneyList)))
       await ns.writePort(2, (Math.min(...moneyList)))
       await ns.writePort(3, ticker)
-        var fiveminavg = ns.nFormat((ns.peek(2) + ns.peek(1)) / 2, '$0.00a')
+        var tenmin = ns.nFormat((ns.peek(2) + ns.peek(1)) / 2, '$0.00a')
+        var pricediff = (((ns.peek(2) + ns.peek(1)) / 2) - ns.stock.getAskPrice(ticker))
+        var forecast = (pricediff / ns.stock.getAskPrice(ticker) *-1)
+        var estVol = ns.nFormat((moneyList[299] + moneyList[2]) / 419, '$0.00a')
+      await ns.writePort(4, forecast * 100);
+      //await ns.writePort(4, (pricediff / ns.stock.getAskPrice(ticker) *-1000))
+
+
         var highestVal = moneyList[0]
         var lowestVal = moneyList[0]
 
@@ -185,14 +191,14 @@ export async function main(ns) {
           AddAttr(lines[i], attr)
 
         }
-        
-        topText.innerHTML = '5MIN HIGH: ' + ns.nFormat(ns.peek(1), '$0.00a') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
+        //ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0')
+        topText.innerHTML = 'Overall Trend: ' + ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
         HighlightText(topTextBG, topText, container)
 
-        midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+fiveminavg+' AVG)'
+        midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+ tenmin +' 7m AVG)'
         HighlightText(midTextBG, midText, container)
 
-        botText.innerHTML = '5MIN LOW: ' + ns.nFormat(ns.peek(2), '$0.00a')
+        botText.innerHTML = 'Movement Per Tick: ' + estVol + ' || [SHORT] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3]), '0.00a');
         HighlightText(botTextBG, botText, container)
 
 
@@ -207,11 +213,13 @@ export async function main(ns) {
     await ns.sleep(delay * 100)
     await ns.clearPort(1);
     await ns.clearPort(2);
+    await ns.clearPort(4);
 
     if (ns.isRunning("wallstreet-lite.js", "home") == false) {
       await ns.clearPort(1);
       await ns.clearPort(2);
       await ns.clearPort(3);
+      await ns.clearPort(4);
       ns.exit();
     }
 
