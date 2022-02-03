@@ -13,6 +13,10 @@ There are 2 version:  Regular and Lite.  Lite version does NOT NEED 4S DATA.  JU
 
 ![Untitled](https://user-images.githubusercontent.com/97868924/150722272-fb7501fa-9a6d-47f5-aea1-fb6a2a3c62e7.png)
 
+Main Version Differences:
+-  Lite Version has an Auto-Trader that ONLY WORKS ON THE CURRENTLY LOADED CHART/TICKER.
+-  If you do not have BN8 shorting functionality, the auto-trader won't work properly.
+
 BIG UPDATE!!  
 
 Tons of data added to the chart!  More buttons!  Collapsable menus!  NO LONGER HAVE TO CLOSE THE CHART TO OPEN A NEW
@@ -29,7 +33,6 @@ NEW FEATURE!  STOCK CRAWLER!  You can use the Stock Crawler to launch a single p
 stocks to go long/short on.  The output will be in the terminal.  Feel free to use it as many times as you'd like, as that
 is the main purpose!
 
-COMING SOON!  SCALPER BOT!
 
 
 ADVANCED POSITION EXPLANATIONS:
