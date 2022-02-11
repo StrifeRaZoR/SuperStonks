@@ -1,36 +1,37 @@
-import AppFactory from '/bb-vue/AppFactory.js'
-// prettier-ignore
-import { getGlobal, html, Mitt, setGlobal, css } from '/bb-vue/lib.js'
+// Edit import line to include absolute path. e.g. '/stocks/wallstreet-lite.js'
+import { SVGChartContainerwallstreet } from 'wallstreet-lite.js'
 
-/** @param { import("~/ns").NS } ns */
 export async function main(ns) {
+  const doc = eval('document')
+  var ticker = ns.args[0];
+
+  //Number of lines rendered.  For stocks, I have this set to 60 to avoid cramping the window.
+  const resolution = 300
+  //Delay between data gathered in seconds.  For stocks, once again, delayed a bit so that there isn't tons of 'flat zones' on the chart.
+  const delay = 10
+
+  const textSize = 2.5
+
+  const lineColor = 'green'
+
+  const strokeWidth = 0.5
+
+  const conWidth = 80
+  const conHeight = 60
+  const wBuffer = 1
+  const hBuffer = 5
   
-  try {
-    ns.disableLog('disableLog');
-    ns.disableLog('asleep');
-    ns.disableLog('sleep');
-    ns.disableLog('getServerMoneyAvailable');
-
-    await new AppFactory(ns).mount({
-      config: { id: 'svg-chart-app-wallstreet', showTips: false },
-      rootComponent: ChartContainerwallstreet,
-    })
-  } catch (error) {
-    console.error(error)
-    ns.tprint(error.toString())
-    ns.exit()
-  }
-
-/* 
+   /* 
   *	Configure coordination channels
-  *	Edit port handles here and in the corresponding data script to fit your current port layout
+  *	Edit port handles to fit your current port layout
   * Defaults: channel1 -> PortHandle(1), etc.
   * ~ Storm6436
   */
   
-  const channel1=ns.getPortHandle(1)
-  const channel2=ns.getPortHandle(2)
-  const channel3=ns.getPortHandle(3)
+  const channel1=ns.getPortHandle(17)
+  const channel2=ns.getPortHandle(18)
+  const channel3=ns.getPortHandle(19)
+  const channel4=ns.getPortHandle(20)
   
   /*
   * Configure script installation location -- Absolute path only. 
@@ -38,860 +39,255 @@ export async function main(ns) {
   * Note: non-root directories require a trailing slash
   * ~Storm6436
   */
-  const scriptDir = "/wallstreet/"
+  const scriptDir = "/stocks/"
+
+  await channel1.clear()
+  await channel2.clear()
+  await channel3.write(ticker)
+
+
+  var container = doc.getElementById('graph_container')
+
+  if (container != null) {
+    KillChildren(container)
+    container.remove()
+  }
+ //Give the chart time to load.
+  const dropPage = doc.getElementById(SVGChartContainerwallstreet)
+
+  container = doc.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  const containerAttr = [
+    ['viewBox', '0 0 ' + conWidth + ' ' + conHeight],
+    ['xmlns', 'http://www.w3.org/2000/svg'],
+    ['id', 'graph_container'],
+  ]
+  AddAttr(container, containerAttr)
   
-  if(!ns.fileExists(scriptDir+"wallstreet-lite-data.js")){
-    ns.tprint("Script path invalid: ", scriptDir+"wallstreet-lite-data.js", " not found.")
-	ns.exit()
+  dropPage.appendChild(container)
+
+  const uiThickness = 0.1
+
+  var topLine = doc.createElementNS('http://www.w3.org/2000/svg', 'line')
+  AddAttr(topLine, [
+    ['x1', String(wBuffer)],
+    ['y1', String(hBuffer)],
+    ['x2', String(conWidth - wBuffer)],
+    ['y2', String(hBuffer)],
+    ['stroke', 'lightgrey'],
+    ['stroke-width', String(uiThickness)],
+  ])
+  container.appendChild(topLine)
+
+  var midLine = doc.createElementNS('http://www.w3.org/2000/svg', 'line')
+  AddAttr(midLine, [
+    ['x1', String(wBuffer)],
+    ['y1', String(conHeight / 2)],
+    ['x2', String(conWidth - wBuffer)],
+    ['y2', String(conHeight / 2)],
+    ['stroke', 'lightgrey'],
+    ['stroke-width', String(uiThickness)],
+  ])
+  container.appendChild(midLine)
+
+  var botLine = doc.createElementNS('http://www.w3.org/2000/svg', 'line')
+  AddAttr(botLine, [
+    ['x1', String(wBuffer)],
+    ['y1', String(conHeight - hBuffer)],
+    ['x2', String(conWidth - wBuffer)],
+    ['y2', String(conHeight - hBuffer)],
+    ['stroke', 'lightgrey'],
+    ['stroke-width', String(uiThickness)],
+  ])
+  container.appendChild(botLine)
+
+
+  var lines = []
+  for (let i = 0; i < resolution - 1; i++) {
+    lines[i] = doc.createElementNS('http://www.w3.org/2000/svg', 'line')
+    AddAttr(lines[i], [
+      ['x1', '0'],
+      ['y1', '60'],
+      ['x2', '100'],
+      ['y2', '0'],
+      ['stroke', 'green'],
+      ['stroke-width', '1'],
+    ])
+    AddAttr(lines[i], [
+      ['x1', '0'],
+      ['y1', '0'],
+      ['x2', '0'],
+      ['y2', '0'],
+      ['stroke', lineColor],
+      ['stroke-width', String(strokeWidth)],
+    ])
+    container.appendChild(lines[i])
   }
 
-  // Listen for specific event
-  //let autoTrader = false
-  //let enableAutoTrader = false
-  let wantsShutdown = false
-  let buyMaxLongShares = false
-  let closeLongPosition = false
-  //let closeShortPosition = false
-  //let buyMaxShortShares = false
-  //let sellAllShares = false
-  //let quickStrangle = false
-  //let longHedge = false
-  //let shortHedge = false
-  //let splitPlay = false
-  //let stockCrawler = false
+  var topText = CreateText('LOADING FORECAST...', wBuffer, hBuffer + hBuffer / 2, container, doc, textSize)
+  var topTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  HighlightText(topTextBG, topText, container)
 
-  //Ticker Chart Storage
-  let loadECP = false
-  let loadMGCP = false
-  let loadBLD = false
-  let loadCLRK = false
-  let loadOMTK = false
-  let loadFSIG = false
-  let loadKGI = false
-  let loadFLCM = false
-  let loadSTM = false
-  let loadDCOMM = false
-  let loadHLS = false
-  let loadVITA = false
-  let loadICRS = false
-  let loadUNV = false
-  let loadAERO = false
-  let loadOMN = false
-  let loadSLRS = false
-  let loadGPH = false
-  let loadNVMD = false
-  let loadWDS = false
-  let loadLXO = false
-  let loadRHOC = false
-  let loadAPHE = false
-  let loadSYSC = false
-  let loadCTK = false
-  let loadNTLK = false
-  let loadOMGA = false
-  let loadFNS = false
-  let loadJGN = false
-  let loadSGC = false
-  let loadCTYS = false
-  let loadMDYN = false
-  let loadTITN = false
-  //End of Ticker Chart Storage
+  var midText = CreateText('LOADING TICKER...', wBuffer, conHeight / 2 + hBuffer / 2, container, doc, textSize)
+  var midTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  HighlightText(midTextBG, midText, container)
 
-  let bus = Mitt().createBus()
-  bus.on('wantsShutdown', () => (wantsShutdown = true))
-  bus.on('buyMaxLong', () => (buyMaxLongShares = true))
-  //bus.on('buyMaxShort', () => (buyMaxShortShares = true))
-  //bus.on('closeAllPositions', () => (sellAllShares = true))
-  bus.on('closeLong', () => (closeLongPosition = true))
-  //bus.on('closeShort', () => (closeShortPosition = true))
-  //bus.on('autoTrade', () => (enableAutoTrader = true))
-  //bus.on('quickPlay', () => (quickStrangle = true))
-  //bus.on('quickHedgeLong', () => (longHedge = true))
-  //bus.on('quickHedgeShort', () => (shortHedge = true))
-  //bus.on('quickSplitPlay', () => (splitPlay = true))
-  //bus.on('stockCrawler', () => (stockCrawler = true))
-
-  //Ticker Chart Bus Triggers
-  bus.on('loadECP', () => (loadECP = true))
-  bus.on('loadMGCP', () => (loadMGCP = true))
-  bus.on('loadBLD', () => (loadBLD = true))
-  bus.on('loadCLRK', () => (loadCLRK = true))
-  bus.on('loadOMTK', () => (loadOMTK = true))
-  bus.on('loadFSIG', () => (loadFSIG = true))
-  bus.on('loadKGI', () => (loadKGI = true))
-  bus.on('loadFLCM', () => (loadFLCM = true))
-  bus.on('loadSTM', () => (loadSTM = true))
-  bus.on('loadDCOMM', () => (loadDCOMM = true))
-  bus.on('loadHLS', () => (loadHLS = true))
-  bus.on('loadVITA', () => (loadVITA = true))
-  bus.on('loadICRS', () => (loadICRS = true))
-  bus.on('loadUNV', () => (loadUNV = true))
-  bus.on('loadAERO', () => (loadAERO = true))
-  bus.on('loadOMN', () => (loadOMN = true))
-  bus.on('loadSLRS', () => (loadSLRS = true))
-  bus.on('loadGPH', () => (loadGPH = true))
-  bus.on('loadNVMD', () => (loadNVMD = true))
-  bus.on('loadWDS', () => (loadWDS = true))
-  bus.on('loadLXO', () => (loadLXO = true))
-  bus.on('loadRHOC', () => (loadRHOC = true))
-  bus.on('loadAPHE', () => (loadAPHE = true))
-  bus.on('loadSYSC', () => (loadSYSC = true))
-  bus.on('loadCTK', () => (loadCTK = true))
-  bus.on('loadNTLK', () => (loadNTLK = true))
-  bus.on('loadOMGA', () => (loadOMGA = true))
-  bus.on('loadFNS', () => (loadFNS = true))
-  bus.on('loadJGN', () => (loadJGN = true))
-  bus.on('loadSGC', () => (loadSGC = true))
-  bus.on('loadCTYS', () => (loadCTYS = true))
-  bus.on('loadMDYN', () => (loadMDYN = true))
-  bus.on('loadTITN', () => (loadTITN = true))
-  //End of Ticker Chart Bus Triggers
-  setGlobal('tickerBus', bus)
-
-  // Instead of closing, let's keep this running
-
-  while (wantsShutdown == false) {
-
-    //init chart loading triggers
-    if (loadECP == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [ECP] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "ECP")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadECP = false;
-    }
-    if (loadMGCP == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [MGCP] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "MGCP")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadMGCP = false;
-    }
-    if (loadBLD == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [BLD] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "BLD")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadBLD = false;
-    }
-    if (loadCLRK == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [CLRK] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "CLRK")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadCLRK = false;
-    }
-    if (loadOMTK == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [OMTK] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "OMTK")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadOMTK = false;
-    }
-    if (loadFSIG == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [FSIG] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "FSIG")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadFSIG = false;
-    }
-    if (loadKGI == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [KGI] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "KGI")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadKGI = false;
-    }
-    if (loadFLCM == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [FLCM] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "FLCM")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadFLCM = false;
-    }
-    if (loadSTM == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [STM] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "STM")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadSTM = false;
-    }
-    if (loadDCOMM == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [DCOMM] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "DCOMM")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadDCOMM = false;
-    }
-    if (loadHLS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [HLS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "HLS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadHLS = false;
-    }
-    if (loadVITA == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [VITA] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "VITA")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadVITA = false;
-    }
-    if (loadICRS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [ICRS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "ICRS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadICRS = false;
-    }
-    if (loadUNV == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [UNV] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "UNV")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadUVN = false;
-    }
-    if (loadAERO == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [AERO] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "AERO")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadAERO = false;
-    }
-    if (loadOMN == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [OMN] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "OMN")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadOMN = false;
-    }
-    if (loadSLRS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [SLRS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "SLRS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadSLRS = false;
-    }
-    if (loadGPH == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [GPH] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "GPH")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadGPH = false;
-    }
-    if (loadNVMD == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [NVMD] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "NVMD")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadNVMD = false;
-    }
-    if (loadWDS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [WDS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "WDS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadWDS = false;
-    }
-    if (loadLXO == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [LXO] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "LXO")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadLXO = false;
-    }
-    if (loadRHOC == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [RHOC] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "RHOC")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadRHOC = false;
-    }
-    if (loadAPHE == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [APHE] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "APHE")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadAPHE = false;
-    }
-    if (loadSYSC == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [SYSC] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "SYSC")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadSYSC = false;
-    }
-    if (loadCTK == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [CTK] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "CTK")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadCTK = false;
-    }
-    if (loadNTLK == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [NTLK] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "NTLK")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadNTLK = false;
-    }
-    if (loadOMGA == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [OMGA] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "OMGA")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadOMGA = false;
-    }
-    if (loadFNS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [FNS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "FNS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadFNS = false;
-    }
-    if (loadJGN == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [JGN] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "JGN")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadJGN = false;
-    }
-    if (loadSGC == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [SGC] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "SGC")
-
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadSGC = false;
-    }
-    if (loadCTYS == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [CTYS] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "CTYS")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadCTYS = false;
-    }
-    if (loadMDYN == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [MDYN] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "MDYN")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadMDYN = false;
-    }
-    if (loadTITN == true) {
-      await ns.scriptKill(scriptDir+"wallstreet-lite-data.js", "home");
-      ns.toast("Loading [TITN] Chart...", "info", 2000);
-      await ns.asleep(500);
-      await ns.run(scriptDir+"wallstreet-lite-data.js", 1, "TITN")
-      await channel1.clear();
-      await channel2.clear();
-      await channel3.clear();
-      //autoTrader = false;
-      loadTITN = false;
-    }
-
- //Stock Crawler Module
-    // if (stockCrawler == true) {
-    //   ns.toast("Crawling Market...", "info", 2000);
-    //   var market = ns.stock.getSymbols().sort(function (a, b) { return ns.stock.getForecast(b) - ns.stock.getForecast(a); })
-    //     for (const target of market) {
-    //     var tvol = ns.stock.getVolatility(target);
-    //     var tfor = ns.stock.getForecast(target);
-    //       if (tvol > 0.01 && tfor > 0.6) {
-    //       ns.tprint("CRAWLER REPORT: [LONG] TARGET");
-    //       ns.tprint(target)
-    //     }
-    //       if (tvol > 0.01 && tfor < 0.4) {
-    //       ns.tprint("CRAWLER REPORT: [SHORT] TARGET");
-    //       ns.tprint(target)
-    //     }
-    //     await ns.asleep(100);
-    //   stockCrawler = false;
-    //   }
-    // }
+  var botText = CreateText('LOADING VOLATILITY...', wBuffer, conHeight - hBuffer / 2, container, doc, textSize)
+  var botTextBG = doc.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  HighlightText(botTextBG, botText, container)
 
 
+  var values = []
+  while (true) {
+    var ticker = ns.args[0];
+    var position = ns.stock.getPosition(ticker)
+    try {
+      if (values.length == resolution) {
+        values.splice(0, 1)
+        await channel1.clear();
+        await channel2.clear();
+        
+      }
+      values[values.length] = ns.stock.getPrice(ns.sprintf(ticker))
 
-    //failsafe exit condition
-    if (wantsShutdown == true) {
+
+      if (values.length > 2) {
+        var lineCount = values.length - 2
+        var xOff = (conWidth - wBuffer * 2) / lineCount
+
+        var moneyList = []
+
+        for (let i = 0; i < values.length; i++) {
+          moneyList[i] = values[i]
+        }
+      await channel1.clear()
+      await channel2.clear()
+      await channel1.write(Math.max(...moneyList))
+      await channel2.write((Math.min(...moneyList)))
+      await channel3.write(ticker)
+        var tenmin = ns.nFormat((channel2.peek() + channel1.peek()) / 2, '$0.00a')
+        var pricediff = (((channel2.peek() + channel1.peek()) / 2) - ns.stock.getAskPrice(ticker))
+        var forecast = (pricediff / ns.stock.getAskPrice(ticker) *-1)
+        var estVol = ns.nFormat((moneyList[299] + moneyList[2]) / 419, '$0.00a')
+      await channel4.write(forecast * 100);
+      //await channel4.write(pricediff / ns.stock.getAskPrice(ticker) *-1000))
+        var highestVal = moneyList[0]
+        var lowestVal = moneyList[0]
+
+        for (var i in moneyList) {
+          if (moneyList[i] > highestVal) {
+            highestVal = moneyList[i]
+          }
+          if (moneyList[i] < lowestVal) {
+            lowestVal = moneyList[i]
+          }
+        }
+
+        highestVal = highestVal - lowestVal
+        //highestVal = moneyList[i];
+        //The above line was commented out because that was causing a few unwanted behaviors.  This was originally intended to
+        //monitor the player's cash, but has been tweaked for stocks.
+
+        for (let i in moneyList) {
+          if (highestVal != lowestVal) {
+            moneyList[i] = (moneyList[i] - lowestVal) / highestVal
+          } else {
+            moneyList[i] = values[i]
+            //This line was also changed by me.  This keeps the graph line from resetting to the middle, eliminating the EKG-style.
+          }
+        }
+
+        for (let i = 0; i < lineCount; i++) {
+          var temp = String(conHeight - (moneyList[i] * (conHeight - hBuffer * 2) + hBuffer))
+          if (isNaN(temp)) {
+            ns.asleep(5000);
+            ns.print("Possible delay in data.  This could be caused by lots of scripts running on HOME.  Please wait...")
+          }
+
+          var attr = [
+            ['x1', String(i * xOff + wBuffer)],
+            ['y1', String(conHeight - (moneyList[i] * (conHeight - hBuffer * 2) + hBuffer))],
+            ['x2', String((i + 1) * xOff + wBuffer)],
+            ['y2', String(conHeight - (moneyList[i + 1] * (conHeight - hBuffer * 2) + hBuffer))],
+          ]
+          AddAttr(lines[i], attr)
+
+        }
+        
+        //ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0')
+        topText.innerHTML = 'Overall Trend: ' + ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
+        HighlightText(topTextBG, topText, container)
+
+        midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+fiveminavg+' AVG)'
+        HighlightText(midTextBG, midText, container)
+
+        botText.innerHTML = 'Movement Per Tick: ' + estVol + ' || [SHORT] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3]), '0.00a');
+        HighlightText(botTextBG, botText, container)
+
+
+        
+      }
+
+
+    } catch (err) {
+      // This might come in handy later
+      ns.print('ERROR: Update Skipped: ' + String(err))
+    }
+    await ns.sleep(delay * 100)
+    await channel1.clear();
+    await channel2.clear();
+    await channel4.clear();
+
+    if (ns.isRunning("wallstreet-lite.js", "home") == false) {
+      await channel1.clear();
+      await channel2.clear();
+      await channel3.clear();
+      await channel4.clear();
       ns.exit();
     }
 
-    if(channel3.peek() != "NULL PORT DATA") {
-    let loadedticker = channel3.peek();
-    let position = ns.stock.getPosition(loadedticker);
-
-    if (buyMaxLongShares == true) {
-      ns.stock.buy(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker), ns.stock.getMaxShares(loadedticker)));
-      await ns.asleep(100);
-      ns.toast("LONG ORDER PLACED - " + loadedticker + ".", "info", 10000);
-      buyMaxLongShares = false;
-
-    }
-    // if (buyMaxShortShares == true) {
-    //   ns.stock.short(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker), ns.stock.getMaxShares(loadedticker)));
-    //   await ns.asleep(100);
-    //   ns.toast("SHORT ORDER PLACED - " + loadedticker + ".", "info", 10000);
-    //   buyMaxShortShares = false;
-
-    // }
-    // if (sellAllShares == true) {
-    //   ns.stock.sell(loadedticker, position[0]);
-    //   ns.stock.sellShort(loadedticker, position[2]);
-    //   ns.toast("CLOSED **ALL** POSITIONS FOR " + loadedticker, "warning", 5000);
-    //   sellAllShares = false;
-
-    // }
-    if (closeLongPosition == true) {
-      ns.stock.sell(loadedticker, position[0]);
-      ns.toast("CLOSED LONG POSITION FOR " + loadedticker, "warning", 5000);
-      closeLongPosition = false;
-
-    }
-    // if (closeShortPosition == true) {
-    //   ns.stock.sellShort(loadedticker, position[2]);
-    //   ns.toast("CLOSED SHORT POSITION FOR " + loadedticker, "warning", 5000);
-    //   closeShortPosition = false;
-
-    //   //Auto-Trader.  Does what it says.  Controls all positions for that ticker for you.
-
-    // }
-    // if (autoTrader == true && position[0] > '1' && ns.stock.getForecast(loadedticker) < 0.50) {
-    //   ns.toast("TRADE PROTECTION TRIGGERED - FORECAST DOES NOT MATCH POSITION.  CLOSING LONG.", "warning", 5000);
-    //   ns.stock.sell(loadedticker, position[0]);
-
-    // }
-    // if (autoTrader == true && position[2] > '1' && ns.stock.getForecast(loadedticker) > 0.50) {
-    //   ns.toast("TRADE PROTECTION TRIGGERED - FORECAST DOES NOT MATCH POSITION.  CLOSING SHORT.", "warning", 5000);
-    //   ns.stock.sellShort(loadedticker, position[2]);
-
-
-    // }
-    // if (autoTrader == true && position[0] == '0' && ns.stock.getForecast(loadedticker) > 0.50) {
-    //   ns.toast("AUTO-TRADE: LONG PURCHASED", "info", 2000);
-    //   await ns.asleep(200);
-    //   buyMaxLongShares = true;
-
-    // }
-    // if (autoTrader == true && position[2] == '0' && ns.stock.getForecast(loadedticker) < 0.50) {
-    //   ns.toast("AUTO-TRADE: SHORT PURCHASED", "info", 2000);
-    //   await ns.asleep(200);
-    //   buyMaxShortShares = true;
-
-
-    //   //Advanced position settings.  Can mess with these if you want, but after testing, these are great.
-
-    // }
-    // if (quickStrangle == true && position[0] == '0' && ns.stock.getForecast(loadedticker) > 0.50) {
-    //   ns.toast("Executing Quick Strangle on " + loadedticker + "...", "info", "5000");
-    //   buyMaxLongShares = true;
-    //   await ns.asleep(500);
-    //   ns.stock.placeOrder(loadedticker, position[0], (ns.stock.getAskPrice(loadedticker) * 1.05), "LimitSell", "Long");
-    //   ns.toast("Limit Sell Placed [LONG]...", "info", 2000);
-    //   ns.stock.placeOrder(loadedticker, position[0], (ns.stock.getBidPrice(loadedticker) * 0.90), "StopSell", "Long");
-    //   ns.toast("Stop Limit Placed [LONG]...", "info", 2000);
-    //   quickStrangle = false;
-
-    // }
-    // if (quickStrangle == true && position[2] == '0' && ns.stock.getForecast(loadedticker) < 0.50) {
-    //   ns.toast("Executing Quick Strangle on " + loadedticker + "...", "info", "5000");
-    //   buyMaxShortShares = true;
-    //   await ns.asleep(500);
-    //   ns.stock.placeOrder(loadedticker, position[2], (ns.stock.getAskPrice(loadedticker) * 0.95), "LimitSell", "Short");
-    //   ns.toast("Limit Sell Placed [SHORT]...", "info", 2000);
-    //   ns.stock.placeOrder(loadedticker, position[2], (ns.stock.getBidPrice(loadedticker) * 1.10), "StopSell", "Short");
-    //   ns.toast("Stop Limit Placed [SHORT]...", "info", 2000);
-    //   quickStrangle = false;
-
-    // }
-    // if (longHedge == true && position[0] == 0) {
-    //   ns.toast("Executing Hedged Long Play on " + loadedticker + "...", "info", 5000);
-    //   ns.stock.buy(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.75, ns.stock.getMaxShares(loadedticker) * 0.75));
-    //   ns.stock.short(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.25, ns.stock.getMaxShares(loadedticker) * 0.25));
-    //   longHedge = false;
-
-    // }
-    // if (shortHedge == true && position[2] == '0') {
-    //   ns.toast("Executing Hedged Short Play on " + loadedticker + "...", "info", 5000);
-    //   ns.stock.buy(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.25, ns.stock.getMaxShares(loadedticker) * 0.25));
-    //   ns.stock.short(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.75, ns.stock.getMaxShares(loadedticker) * 0.75));
-    //   shortHedge = false;
-
-    // }
-    // if (splitPlay == true && position[0] == '0' && position[2] == '0') {
-    //   ns.toast("Executing Split Play on " + loadedticker + "...", "info", 5000);
-    //   ns.stock.buy(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.49, ns.stock.getMaxShares(loadedticker) * 0.50));
-    //   ns.stock.short(loadedticker, Math.min((ns.getServerMoneyAvailable("home") - 1000000) / ns.stock.getAskPrice(loadedticker) * 0.49, ns.stock.getMaxShares(loadedticker) * 0.50));
-    //   splitPlay = false;
-
-    // }
-
-    //Auto-Trader button configuration.  Don't touch.
-
-    // if (enableAutoTrader == true) {
-    //   let autoTradeConfirm = await ns.prompt("Enable Auto-Trade?")
-
-    //   if (autoTradeConfirm == true) {
-    //     ns.toast("Enabling Auto-Trader", "info", 5000);
-    //     autoTrader = true;
-    //     enable//AutoTrader = false;
-    //   }
-    //   if (autoTradeConfirm == false) {
-    //     ns.toast("Auto-Trader NOT Enabled", "info", 5000);
-    //     //autoTrader = false;
-    //     enable//AutoTrader = false;
-    //   }
-
-    // }
-
-    }
-
-    await ns.asleep(500)
-
-  
   }
 }
 
-export const SVGChartContainerwallstreet = 'svgChartContainerwallstreet'
-const ChartContainerwallstreet = {
-  name: 'svg-chart-wallstreet',
-  inject: ['appShutdown',],
-  template: html`
-    <bbv-win
-      class="__CMP_NAME__"
-      title="WSE Active Trader"
-      no-pad
-      start-height="691px"
-      start-width="539px"
-    >
- 
-      <details align="center"><summary>TICKERS [ALL]</summary>
-      <div>
-      <button align="left" @click="loadECP">[ECP]</button>
-      <button align="left" @click="loadMGCP">[MGCP]</button>
-      <button align="left" @click="loadBLD">[BLD]</button>
-      <button align="left" @click="loadCLRK">[CLRK]</button>
-      <button align="left" @click="loadOMTK">[OMTK]</button>
-      <button align="left" @click="loadFSIG">[FSIG]</button>
-      <button align="left" @click="loadKGI">[KGI]</button>
-      <button align="left" @click="loadFLCM">[FLCM]</button>
-      <button align="left" @click="loadSTM">[STM]</button>
-      <button align="left" @click="loadDCOMM">[DCOMM]</button>
-      <button align="left" @click="loadHLS">[HLS]</button>
-      <button align="center" @click="loadVITA">[VITA]</button>
-      <button align="center" @click="loadICRS">[ICRS]</button>
-      <button align="center" @click="loadUNV">[UNV]</button>
-      <button align="center" @click="loadAERO">[AERO]</button>
-      <button align="center" @click="loadOMN">[OMN]</button>
-      <button align="center" @click="loadSLRS">[SLRS]</button>
-      <button align="center" @click="loadGPH">[GPH]</button>
-      <button align="center" @click="loadNVMD">[NVMD]</button>
-      <button align="center" @click="loadWDS">[WDS]</button>
-      <button align="center" @click="loadLXO">[LXO]</button>
-      <button align="center" @click="loadRHOC">[RHOC]</button>
-      <button align="right" @click="loadAPHE">[APHE]</button>
-      <button align="right" @click="loadSYSC">[SYSC]</button>
-      <button align="right" @click="loadCTK">[CTK]</button>
-      <button align="right" @click="loadNTLK">[NTLK]</button>
-      <button align="right" @click="loadOMGA">[OMGA]</button>
-      <button align="right" @click="loadFNS">[FNS]</button>
-      <button align="right" @click="loadJGN">[JGN]</button>
-      <button align="right" @click="loadSGC">[SGC]</button>
-      <button align="right" @click="loadCTYS">[CTYS]</button>
-      <button align="right" @click="loadMDYN">[MDYN]</button>
-      <button align="right" @click="loadTITN">[TITN]</button>
-      </div>
-      </details>
-      </div>
-      <div v-once id="${SVGChartContainerwallstreet}" />
-      <details align="left"><summary>Advanced Positions</summary>
-      <div>
-      <button @click="">NOT IN LITE VERSION</button>
+function AddAttr(element, attrList) {
+  for (var i in attrList) {
+    element.setAttribute(attrList[i][0], attrList[i][1])
+  }
+}
 
-      </div>
-      </details>
-      <details align="right"><summary>EXTRA TOOLS </summary>
-      <div>
-      <button align="right" @click="">NOT IN LITE VERSION</button>
+function KillChildren(element) {
+  const children = element.children
+  for (var line of children) {
+    line.remove()
+  }
+}
 
-      </div>
-      </details>
+function CreateText(text, x, y, parent, doc, textSize) {
+  var textElm = doc.createElementNS('http://www.w3.org/2000/svg', 'text')
+  AddAttr(textElm, [
+    ['x', String(x)],
+    ['y', String(y)],
+    ['fill', 'lightgrey'],
+    ['font-size', String(textSize)],
+    ['font-family', 'sans-serif'],
+    ['stroke', 'black'],
+    ['stroke-width', '0'],
+  ])
+  textElm.innerHTML = text
+  parent.appendChild(textElm)
+  return textElm
+}
 
-      <template #actions>
-        <div><bbv-button @click="shutdownAll">Close Chart</bbv-button></div>
-        <div><bbv-button @click="buyMaxLong">BUY MAX [LONG]</bbv-button></div>
-        <div><bbv-button @click="sellMaxLong">SELL MAX [LONG]</bbv-button></div>
-      </template>
-    </bbv-win>
-  `,
+function HighlightText(bg, text, parent) {
+  var textBox = text.getBBox()
 
-  data() {
-    return {}
-  },
-
-  methods: {
-    shutdownAll() {
-      getGlobal('tickerBus').emit('wantsShutdown')
-      this.appShutdown()
-    },
-    buyMaxLong() {
-      getGlobal('tickerBus').emit('buyMaxLong')
-    },
-    buyMaxShort() {
-      getGlobal('tickerBus').emit('buyMaxShort')
-    },
-    closeAllPositions() {
-      getGlobal('tickerBus').emit('closeAllPositions')
-    },
-    sellMaxLong() {
-      getGlobal('tickerBus').emit('closeLong')
-    },
-    sellMaxShort() {
-      getGlobal('tickerBus').emit('closeShort')
-    },
-    enableAutoTrade() {
-      getGlobal('tickerBus').emit('autoTrade')
-    },
-    quickStrangle() {
-      getGlobal('tickerBus').emit('quickPlay')
-    },
-    quickSplit() {
-      getGlobal('tickerBus').emit('quickSplitPlay')
-    },
-    longHedge() {
-      getGlobal('tickerBus').emit('quickHedgeLong')
-    },
-    shortHedge() {
-      getGlobal('tickerBus').emit('quickHedgeShort')
-    },
-    stockCrawler() {
-      getGlobal('tickerBus').emit('stockCrawler')
-    },
-    loadECP() {
-      getGlobal('tickerBus').emit('loadECP')
-    },
-    loadMGCP() {
-      getGlobal('tickerBus').emit('loadMGCP')
-    },
-    loadBLD() {
-      getGlobal('tickerBus').emit('loadBLD')
-    },
-    loadCLRK() {
-      getGlobal('tickerBus').emit('loadCLRK')
-    },
-    loadOMTK() {
-      getGlobal('tickerBus').emit('loadOMTK')
-    },
-    loadFSIG() {
-      getGlobal('tickerBus').emit('loadFSIG')
-    },
-    loadKGI() {
-      getGlobal('tickerBus').emit('loadKGI')
-    },
-    loadFLCM() {
-      getGlobal('tickerBus').emit('loadFLCM')
-    },
-    loadSTM() {
-      getGlobal('tickerBus').emit('loadSTM')
-    },
-    loadDCOMM() {
-      getGlobal('tickerBus').emit('loadDCOMM')
-    },
-    loadHLS() {
-      getGlobal('tickerBus').emit('loadHLS')
-    },
-    loadVITA() {
-      getGlobal('tickerBus').emit('loadVITA')
-    },
-    loadICRS() {
-      getGlobal('tickerBus').emit('loadICRS')
-    },
-    loadUNV() {
-      getGlobal('tickerBus').emit('loadUNV')
-    },
-    loadAERO() {
-      getGlobal('tickerBus').emit('loadAERO')
-    },
-    loadOMN() {
-      getGlobal('tickerBus').emit('loadOMN')
-    },
-    loadSLRS() {
-      getGlobal('tickerBus').emit('loadSLRS')
-    },
-    loadGPH() {
-      getGlobal('tickerBus').emit('loadGPH')
-    },
-    loadNVMD() {
-      getGlobal('tickerBus').emit('loadNVMD')
-    },
-    loadWDS() {
-      getGlobal('tickerBus').emit('loadWDS')
-    },
-    loadLXO() {
-      getGlobal('tickerBus').emit('loadLXO')
-    },
-    loadRHOC() {
-      getGlobal('tickerBus').emit('loadRHOC')
-    },
-    loadAPHE() {
-      getGlobal('tickerBus').emit('loadAPHE')
-    },
-    loadSYSC() {
-      getGlobal('tickerBus').emit('loadSYSC')
-    },
-    loadCTK() {
-      getGlobal('tickerBus').emit('loadCTK')
-    },
-    loadNTLK() {
-      getGlobal('tickerBus').emit('loadNTLK')
-    },
-    loadOMGA() {
-      getGlobal('tickerBus').emit('loadOMGA')
-    },
-    loadFNS() {
-      getGlobal('tickerBus').emit('loadFNS')
-    },
-    loadJGN() {
-      getGlobal('tickerBus').emit('loadJGN')
-    },
-    loadSGC() {
-      getGlobal('tickerBus').emit('loadSGC')
-    },
-    loadCTYS() {
-      getGlobal('tickerBus').emit('loadCTYS')
-    },
-    loadMDYN() {
-      getGlobal('tickerBus').emit('loadMDYN')
-    },
-    loadTITN() {
-      getGlobal('tickerBus').emit('loadTITN')
-    },
-  },
+  AddAttr(bg, [
+    ['x', String(textBox.x)],
+    ['y', String(textBox.y)],
+    ['width', String(textBox.width)],
+    ['height', String(textBox.height)],
+    ['fill', 'black'],
+    ['opacity', '0.0'],
+  ])
+  parent.insertBefore(bg, text)
+  
 }
