@@ -28,9 +28,10 @@ export async function main(ns) {
   * ~ Storm6436
   */
   
-  const channel1=ns.getPortHandle(1)
-  const channel2=ns.getPortHandle(2)
-  const channel3=ns.getPortHandle(3)
+  const channel1=ns.getPortHandle(17)
+  const channel2=ns.getPortHandle(18)
+  const channel3=ns.getPortHandle(19)
+  const channel4=ns.getPortHandle(20)
   
   /*
   * Configure script installation location -- Absolute path only. 
@@ -39,7 +40,7 @@ export async function main(ns) {
   * ~Storm6436
   */
   const scriptDir = "/stocks/"
-  
+
   await channel1.clear()
   await channel2.clear()
   await channel3.write(ticker)
@@ -160,10 +161,15 @@ export async function main(ns) {
         }
       await channel1.clear()
       await channel2.clear()
-      await ns.writePort(1, (Math.max(...moneyList)))
+      await channel1.write(Math.max(...moneyList))
       await channel2.write((Math.min(...moneyList)))
       await channel3.write(ticker)
-        var fiveminavg = ns.nFormat((channel2.peek() + channel1.peek()) / 2, '$0.00a')
+        var tenmin = ns.nFormat((channel2.peek() + channel1.peek()) / 2, '$0.00a')
+        var pricediff = (((channel2.peek() + channel1.peek()) / 2) - ns.stock.getAskPrice(ticker))
+        var forecast = (pricediff / ns.stock.getAskPrice(ticker) *-1)
+        var estVol = ns.nFormat((moneyList[299] + moneyList[2]) / 419, '$0.00a')
+      await channel4.write(forecast * 100);
+      //await channel4.write(pricediff / ns.stock.getAskPrice(ticker) *-1000))
         var highestVal = moneyList[0]
         var lowestVal = moneyList[0]
 
@@ -207,13 +213,14 @@ export async function main(ns) {
 
         }
         
-        topText.innerHTML = '5MIN HIGH: ' + ns.nFormat(channel1.peek(), '$0.00a') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
+        //ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0')
+        topText.innerHTML = 'Overall Trend: ' + ns.nFormat((pricediff / ns.stock.getAskPrice(ticker) *-1), '%0.0') + ' || [LONG] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[0], "Long") - (position[0] * position[1]), '0.00a');
         HighlightText(topTextBG, topText, container)
 
         midText.innerHTML = '['+ ticker + ']' + ': ' + ns.nFormat(ns.stock.getPrice(ns.sprintf(ticker)), '$0.00a') + ' || ('+fiveminavg+' AVG)'
         HighlightText(midTextBG, midText, container)
 
-        botText.innerHTML = '5MIN LOW: ' + ns.nFormat(channel2.peek(), '$0.00a')
+        botText.innerHTML = 'Movement Per Tick: ' + estVol + ' || [SHORT] PROFIT: ' + ns.nFormat(ns.stock.getSaleGain(ticker, position[2], "Short") - (position[2] * position[3]), '0.00a');
         HighlightText(botTextBG, botText, container)
 
 
@@ -228,11 +235,13 @@ export async function main(ns) {
     await ns.sleep(delay * 100)
     await channel1.clear();
     await channel2.clear();
+    await channel4.clear();
 
-    if (ns.isRunning(scriptDir+"wallstreet-lite.js", "home") == false) {
+    if (ns.isRunning("wallstreet-lite.js", "home") == false) {
       await channel1.clear();
       await channel2.clear();
       await channel3.clear();
+      await channel4.clear();
       ns.exit();
     }
 
